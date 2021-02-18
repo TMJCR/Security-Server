@@ -2,9 +2,14 @@ module.exports = class Keypad {
   constructor(passcode) {
     this.passcode = passcode;
   }
-  login() {
+  enterPasscode(enteredPasscode) {
     const response =
-      this.passcode === "1234" ? "Code Matches" : "Incorrect Code";
+      enteredPasscode === this.passcode
+        ? "Passcode Accepted"
+        : "Incorrect Passcode";
     return response;
+  }
+  resetAlarm(alarm) {
+    alarm.reset();
   }
 };
