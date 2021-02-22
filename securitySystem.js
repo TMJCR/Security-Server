@@ -1,31 +1,49 @@
 const { Sensor } = require("./modules/equipment");
 const inventory = require("./modules/inventory");
-const sensor = new Sensor("Sensor1", "#1234", "sensor", "inactive");
 
-console.log(inventory.cameras, "test");
+// console.log(inventory.cameras, "test");
 module.exports = class SecuritySystem {
   constructor() {
-    this.status = {};
+    this.status = { sensors: [], cameras: [] };
   }
   bootUpSecuritySystem() {
     console.log("system is booting up");
-    this.fetchAllSystemEquipment();
-    this.reportStatus();
+    const test = this.fetchAllSystemEquipment();
+    return test;
   }
+  registerEquipment(equipmentList, equipmentType) {
+    const registeredList = equipmentList.map((item) => {
+      if (equipmentType === "sensor") {
+        return new Sensor("test", "sensor");
+      } else if (equipmentType === "camera") {
+        return new Camera(Object.values(item));
+      }
+    });
+    console.log("registered", registeredList);
+  }
+
   fetchAllSystemEquipment() {
     const { sensors, cameras } = inventory;
-    sensors.map((sensor) => {
-      console.log("t", sensor);
+    const sensorList = sensors.map((sensor) => {
+      return new Sensor(
+        sensor.name,
+        sensor.type,
+        sensor.range,
+        sensor.currentStatus,
+        sensor.sensitivity
+      );
     });
+    this.registerEquipment(sensors, "sensor");
+    this.status.sensors = sensorList;
+    // console.log(sensorList);
     // Fetch all the objects from the database, fetch cameras, sensors, door sensors, alarm and keypad seperately. Update the status.
-    this.status = sensor.reportStatus();
   }
   reportStatus() {
-    console.log(this.status);
+    // console.log(this.status);
     return this.status;
   }
   updateState(item, state) {
-    console.log(this.status, item, state);
+    // console.log(this.status, item, state);
   }
 };
 
