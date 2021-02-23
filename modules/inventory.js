@@ -21,4 +21,10 @@ module.exports = inventory = {
       type: "camera",
     },
   ],
+  doorSensors: [
+    { name: "DoorSensor1", type: "doorSensor" },
+    { name: "DoorSensor2", type: "doorSensor" },
+  ],
+  keypads: [{ name: "Keypad1", type: "keypad" }],
+  alarms: [{ name: "Alarm1", type: "alarm" }],
 };

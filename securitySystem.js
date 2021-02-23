@@ -1,30 +1,27 @@
-const { Sensor } = require("./modules/equipment");
+const {
+  Sensor,
+  Camera,
+  DoorSensor,
+  Keypad,
+  Alarm,
+} = require("./modules/equipment");
 const inventory = require("./modules/inventory");
 
-// console.log(inventory.cameras, "test");
 module.exports = class SecuritySystem {
   constructor() {
-    this.status = { sensors: [], cameras: [] };
+    this.status = {};
   }
   bootUpSecuritySystem() {
     console.log("system is booting up");
-    const test = this.fetchAllSystemEquipment();
-    return test;
-  }
-  registerEquipment(equipmentList, equipmentType) {
-    const registeredList = equipmentList.map((item) => {
-      if (equipmentType === "sensor") {
-        return new Sensor("test", "sensor");
-      } else if (equipmentType === "camera") {
-        return new Camera(Object.values(item));
-      }
-    });
-    console.log("registered", registeredList);
+    this.fetchAllSystemEquipment();
+    this.reportStatus();
   }
 
   fetchAllSystemEquipment() {
-    const { sensors, cameras } = inventory;
-    const sensorList = sensors.map((sensor) => {
+    const { sensors, cameras, doorSensors, keypads, alarms } = inventory;
+
+    // Register sensors
+    this.status.sensors = sensors.map((sensor) => {
       return new Sensor(
         sensor.name,
         sensor.type,
@@ -33,23 +30,33 @@ module.exports = class SecuritySystem {
         sensor.sensitivity
       );
     });
-    this.registerEquipment(sensors, "sensor");
-    this.status.sensors = sensorList;
-    // console.log(sensorList);
-    // Fetch all the objects from the database, fetch cameras, sensors, door sensors, alarm and keypad seperately. Update the status.
+
+    // Register cameras
+    this.status.cameras = cameras.map((camera) => {
+      return new Camera(camera.name, camera.type);
+    });
+
+    // Register door sensors
+    this.status.doorSensors = doorSensors.map((doorSensor) => {
+      return new DoorSensor(doorSensor.name, doorSensor.type);
+    });
+
+    // Register keypads
+    this.status.keypads = keypads.map((keypad) => {
+      return new Keypad(keypad.name, keypad.type);
+    });
+
+    // Register alarms
+    this.status.alarms = alarms.map((alarm) => {
+      return new Alarm(alarm.name, alarm.type);
+    });
   }
   reportStatus() {
-    // console.log(this.status);
     return this.status;
   }
-  updateState(item, state) {
-    // console.log(this.status, item, state);
+
+  update(item, state) {
+    console.log(item);
+    this.status.keypads[0].currentStatus = item;
   }
 };
-
-// Set up the post requests that
-
-// const Keypad = require("./modules/keypad.js");
-// const keypad = new Keypad("1234");
-// const response = keypad.enterPasscode("1234");
-// console.log(response);

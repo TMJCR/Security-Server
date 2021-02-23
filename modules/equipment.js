@@ -23,6 +23,33 @@ class Sensor extends Equipment {
   }
 }
 
+class Camera extends Equipment {
+  constructor(name, type, range = 2, sensitivity = 50) {
+    super(name, type);
+  }
+}
+
+class DoorSensor extends Equipment {
+  constructor(name, type) {
+    super(name, type);
+  }
+}
+
+class Keypad extends Equipment {
+  constructor(name, type) {
+    super(name, type);
+  }
+}
+
+class Alarm extends Equipment {
+  constructor(name, type) {
+    super(name, type);
+  }
+}
 module.exports = {
   Sensor,
+  Camera,
+  DoorSensor,
+  Keypad,
+  Alarm,
 };

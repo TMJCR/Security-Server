@@ -15,4 +15,15 @@ router.get("/", (req, res, next) => {
   res.send(securitySystem.reportStatus());
 });
 
+router.get("/update", (req, res, next) => {
+  res.render("index", { title: JSON.stringify(securitySystem.reportStatus()) });
+});
+
+// POST method route
+router.post("/update", function (req, res) {
+  console.log(req.body.newID);
+  securitySystem.update(req.body.newID);
+  res.send(securitySystem.reportStatus());
+});
+
 module.exports = router;
