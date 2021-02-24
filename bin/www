@@ -1,31 +1,36 @@
 #!/usr/bin/env node
+const mongoose = require("mongoose");
 
 /**
  * Module dependencies.
  */
 
-var app = require("../app");
-var debug = require("debug")("security:server");
-var http = require("http");
+const app = require("../app");
+const debug = require("debug")("security:server");
+const http = require("http");
 
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || "3000");
+const CONNECTION_URL =
+  "mongodb+srv://TMJCR:QhMehCkdfJoH8N8d@cluster0.tzcdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const port = normalizePort(process.env.PORT || "5000");
 app.set("port", port);
+const server = http.createServer(app);
 
-/**
- * Create HTTP server.
- */
+mongoose
+  .connect(CONNECTION_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(
+    server.listen(port, () => {
+      console.log("server running");
+    })
+  )
+  .catch((error) => console.log(error.message));
+mongoose.set("useFindAndModify", false);
 
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
 

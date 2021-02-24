@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const SecuritySystem = require("../securitySystem");
+
 // Instantiate Security System
 const securitySystem = new SecuritySystem();
 securitySystem.bootUpSecuritySystem();
@@ -10,8 +11,9 @@ securitySystem.bootUpSecuritySystem();
 // router.get("/", function (req, res, next) {
 //   res.render("index", { title: "Express" });
 // });
+const PostMessage = require("../models/securitySystem");
 
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
   res.send(securitySystem.reportStatus());
 });
 
@@ -20,10 +22,18 @@ router.get("/update", (req, res, next) => {
 });
 
 // POST method route
-router.post("/update", function (req, res) {
-  console.log(req.body.newID);
-  securitySystem.update(req.body.newID);
-  res.send(securitySystem.reportStatus());
+router.post("/update", async (req, res) => {
+  try {
+    const newPost = await new PostMessage({ title: req.body.newID });
+    console.log("w", newPost);
+    await newPost.save();
+    const postMessages = await PostMessage.find();
+    res.send(postMessages);
+  } catch (error) {
+    console.log("f", error);
+  }
+
+  // res.send(securitySystem.reportStatus());
 });
 
 module.exports = router;
