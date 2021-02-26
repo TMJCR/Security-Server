@@ -24,11 +24,12 @@ router.get("/update", (req, res, next) => {
 // POST method route
 router.post("/update", async (req, res) => {
   try {
-    const newPost = await new PostMessage({ title: req.body.newID });
+    console.log(req.body);
+    const newPost = await new PostMessage({ title: req.body.name });
     console.log("w", newPost);
     await newPost.save();
     const postMessages = await PostMessage.find();
-    res.send(postMessages);
+    res.send(JSON.stringify(postMessages));
   } catch (error) {
     console.log("f", error);
   }
