@@ -1,12 +1,10 @@
 const { v4: uuidv4 } = require("uuid");
 
 class Equipment {
-  constructor(name, type) {
+  constructor(name, type, currentStatus = "inactive") {
     this.status = {
       name,
       type,
-      id: uuidv4(),
-      currentStatus: "inactive",
     };
   }
 
@@ -17,8 +15,8 @@ class Equipment {
 }
 
 class Sensor extends Equipment {
-  constructor(name, type, range = 2, sensitivity = 50) {
-    super(name, type);
+  constructor(name, type, currentStatus, range = 2, sensitivity = 50) {
+    super(name, type, currentStatus);
     this.status = { ...this.status, configuration: { range, sensitivity } };
   }
 }

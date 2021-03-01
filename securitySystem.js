@@ -7,15 +7,16 @@ const {
   Keypad,
   Alarm,
 } = require("./modules/equipment");
-const inventory = require("./modules/inventory");
+// const inventory = require("./modules/inventory");
 
 module.exports = class SecuritySystem {
   constructor() {
     this.status = {};
+    this.alarm = "OFF";
   }
-  bootUpSecuritySystem() {
+  async bootUpSecuritySystem() {
     console.log("system is booting up");
-    this.fetchAllSystemEquipment();
+    await this.fetchAllSystemEquipment();
     this.reportStatus();
   }
 
@@ -38,19 +39,18 @@ module.exports = class SecuritySystem {
   async fetchAllSystemEquipment() {
     // const { sensors, cameras, doorSensors, keypads, alarms } = inventory;
     const sensorList = await this.fetchEquipmentByType("Sensor");
-    console.log(sensorList);
-
+    console.log("SENSEOR LIST =", sensorList);
     // Register sensors
     this.status.sensors = sensorList.map((sensor) => {
       return new Sensor(
         sensor.name,
         sensor.type,
-        sensor.range,
         sensor.currentStatus,
+        sensor.range,
         sensor.sensitivity
       );
     });
-
+    console.log(this.status.sensors);
     // Register cameras
     // this.status.cameras = cameras.map((camera) => {
     //   return new Camera(camera.name, camera.type);

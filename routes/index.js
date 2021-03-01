@@ -13,8 +13,8 @@ securitySystem.bootUpSecuritySystem();
 // });
 const Sensor = require("../models/sensor");
 
-router.get("/", async (req, res, next) => {
-  res.send(securitySystem.reportStatus());
+router.get("/", (req, res, next) => {
+  res.send(JSON.stringify(securitySystem.reportStatus()));
 });
 
 router.get("/update", (req, res, next) => {
@@ -25,18 +25,32 @@ router.get("/update", (req, res, next) => {
 router.post("/update", async (req, res) => {
   try {
     console.log(req.body);
-    const newSensor = await new Sensor({
-      name: "Sensor1",
-      type: "sensor",
-      id: "234ddfsdfs",
-      currentStatus: "Online",
-      range: 2.5,
-      sensitivity: 80,
-    });
-    console.log("w", newPost);
-    await newPost.save();
-    const postMessages = await PostMessage.find();
-    res.send(JSON.stringify(postMessages));
+    const newSensor = await new Sensor(req.body);
+    await newSensor.save();
+    const sensors = await Sensor.find();
+    res.send(JSON.stringify(sensors));
+  } catch (error) {
+    console.log("f", error);
+  }
+
+  // res.send(securitySystem.reportStatus());
+});
+
+router.put("/update", async (req, res) => {
+  try {
+    // console.log(req.body);
+    console.log("CurrentStatus", securitySystem.alarm);
+    // Get back the specific item of equipment from the security system
+    // Run the relevant funcitons off of this... eg. update the database, trigger the alarm etc
+    securitySystem.alarm = req.body.s;
+    console.log("CurrentStatus", securitySystem.alarm);
+
+    await Sensor.findOneAndUpdate(
+      { name: req.body.name },
+      { currentStatus: req.body.currentStatus }
+    );
+    const sensors = await Sensor.find();
+    res.send(JSON.stringify(sensors));
   } catch (error) {
     console.log("f", error);
   }
