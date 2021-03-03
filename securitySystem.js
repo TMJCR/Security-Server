@@ -1,4 +1,4 @@
-const SensorModel = require("./models/sensor");
+const EquipmentModel = require("./models/equipment");
 
 const {
   Sensor,
@@ -12,7 +12,6 @@ const {
 module.exports = class SecuritySystem {
   constructor() {
     this.status = {};
-    this.alarm = "OFF";
   }
   async bootUpSecuritySystem() {
     console.log("system is booting up");
@@ -20,56 +19,50 @@ module.exports = class SecuritySystem {
     this.reportStatus();
   }
 
-  async fetchEquipmentByType(type) {
-    let equipmentList;
-    try {
-      switch (type) {
-        case "Sensor":
-          equipmentList = await SensorModel.find();
-          break;
-        case "Camera":
-          equipmentList = await SensorModel.find();
-          break;
-      }
-      return equipmentList;
-    } catch (error) {
-      console.log(error);
-    }
-  }
   async fetchAllSystemEquipment() {
-    // const { sensors, cameras, doorSensors, keypads, alarms } = inventory;
-    const sensorList = await this.fetchEquipmentByType("Sensor");
-    console.log("SENSEOR LIST =", sensorList);
+    const equipmentList = await EquipmentModel.find();
+    const sensorList = equipmentList.filter((item) => item.type === "Sensor");
+    const cameraList = equipmentList.filter((item) => item.type === "Camera");
+    const doorSensorList = equipmentList.filter(
+      (item) => item.type === "DoorSensor"
+    );
+    const keypadList = equipmentList.filter((item) => item.type === "Keypad");
+    const alarmList = equipmentList.filter((item) => item.type === "Alarm");
+
     // Register sensors
-    this.status.sensors = sensorList.map((sensor) => {
+    const test = sensorList.map((sensor) => {
       return new Sensor(
         sensor.name,
         sensor.type,
-        sensor.currentStatus,
-        sensor.range,
-        sensor.sensitivity
+        sensor._id,
+        sensor.configuration.range,
+        sensor.configuration.sensitivity
       );
     });
-    console.log(this.status.sensors);
+    const test2 = new Sensor("1", "Sensor", "12", "22");
+    // console.log(test);
+    // console.log(test2.triggerSensor("2"));
+    this.status.sensors = test;
+
     // Register cameras
-    // this.status.cameras = cameras.map((camera) => {
-    //   return new Camera(camera.name, camera.type);
-    // });
+    this.status.cameras = cameraList.map((camera) => {
+      return new Camera(camera.name, camera.type);
+    });
 
     // // Register door sensors
-    // this.status.doorSensors = doorSensors.map((doorSensor) => {
-    //   return new DoorSensor(doorSensor.name, doorSensor.type);
-    // });
+    this.status.doorSensors = doorSensorList.map((doorSensor) => {
+      return new DoorSensor(doorSensor.name, doorSensor.type);
+    });
 
     // // Register keypads
-    // this.status.keypads = keypads.map((keypad) => {
-    //   return new Keypad(keypad.name, keypad.type);
-    // });
+    this.status.keypads = keypadList.map((keypad) => {
+      return new Keypad(keypad.name, keypad.type);
+    });
 
     // // Register alarms
-    // this.status.alarms = alarms.map((alarm) => {
-    //   return new Alarm(alarm.name, alarm.type);
-    // });
+    this.status.alarms = alarmList.map((alarm) => {
+      return new Alarm(alarm.name, alarm.type);
+    });
   }
   reportStatus() {
     return this.status;

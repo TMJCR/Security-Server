@@ -11,7 +11,7 @@ securitySystem.bootUpSecuritySystem();
 // router.get("/", function (req, res, next) {
 //   res.render("index", { title: "Express" });
 // });
-const Sensor = require("../models/sensor");
+const Equipment = require("../models/equipment");
 
 router.get("/", (req, res, next) => {
   res.send(JSON.stringify(securitySystem.reportStatus()));
@@ -24,11 +24,12 @@ router.get("/update", (req, res, next) => {
 // POST method route
 router.post("/update", async (req, res) => {
   try {
-    console.log(req.body);
-    const newSensor = await new Sensor(req.body);
-    await newSensor.save();
-    const sensors = await Sensor.find();
-    res.send(JSON.stringify(sensors));
+    const newEquipment = await new Equipment(req.body);
+    await newEquipment.save();
+    console.log(securitySystem);
+    await securitySystem.bootUpSecuritySystem();
+    const equipment = await Equipment.find();
+    res.send(JSON.stringify(equipment));
   } catch (error) {
     console.log("f", error);
   }
@@ -38,19 +39,18 @@ router.post("/update", async (req, res) => {
 
 router.put("/update", async (req, res) => {
   try {
-    // console.log(req.body);
-    console.log("CurrentStatus", securitySystem.alarm);
-    // Get back the specific item of equipment from the security system
-    // Run the relevant funcitons off of this... eg. update the database, trigger the alarm etc
-    securitySystem.alarm = req.body.s;
-    console.log("CurrentStatus", securitySystem.alarm);
-
-    await Sensor.findOneAndUpdate(
-      { name: req.body.name },
-      { currentStatus: req.body.currentStatus }
+    const triggeredSensor = securitySystem.status.sensors.find(
+      (sensor) => sensor.status.name === req.body.name
     );
-    const sensors = await Sensor.find();
-    res.send(JSON.stringify(sensors));
+    triggeredSensor.detectMovement(req.body.name, req.body.currentState);
+    // Trigger the matching camera
+
+    // Trigger all alarms
+    securitySystem.status.alarms.forEach(
+      (alarm) => (alarm.status.currentStatus = "Triggered")
+    );
+
+    res.send(securitySystem.reportStatus());
   } catch (error) {
     console.log("f", error);
   }
@@ -59,3 +59,8 @@ router.put("/update", async (req, res) => {
 });
 
 module.exports = router;
+
+// await Sensor.findOneAndUpdate(
+//   { name: req.body.name },
+//   { currentStatus: req.body.currentStatus }
+// );
