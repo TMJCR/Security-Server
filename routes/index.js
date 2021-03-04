@@ -17,24 +17,37 @@ router.get("/", (req, res, next) => {
   res.send(JSON.stringify(securitySystem.reportStatus()));
 });
 
-router.get("/update", (req, res, next) => {
-  res.render("index", { title: JSON.stringify(securitySystem.reportStatus()) });
+router.get("/create", (req, res, next) => {
+  res.render("create");
 });
-
 // POST method route
-router.post("/update", async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
-    const newEquipment = await new Equipment(req.body);
+    const { type, name, range, sensitivity } = req.body;
+    let equipmentAttributes = { name, type };
+    switch (type) {
+      case "Sensor":
+        equipmentAttributes = {
+          ...equipmentAttributes,
+          configuration: { range, sensitivity },
+        };
+        break;
+      case "Camera":
+        break;
+      case "DoorSensor":
+        break;
+      case "Alarm":
+        break;
+      case "Keypad":
+        break;
+    }
+    const newEquipment = await new Equipment(equipmentAttributes);
     await newEquipment.save();
-    console.log(securitySystem);
-    await securitySystem.bootUpSecuritySystem();
-    const equipment = await Equipment.find();
-    res.send(JSON.stringify(equipment));
+    await securitySystem.rebootSystem();
+    res.send("Success");
   } catch (error) {
     console.log("f", error);
   }
-
-  // res.send(securitySystem.reportStatus());
 });
 
 router.put("/update", async (req, res) => {

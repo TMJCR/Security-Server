@@ -19,6 +19,13 @@ module.exports = class SecuritySystem {
     this.reportStatus();
   }
 
+  async rebootSystem() {
+    console.log("System resetting...");
+    this.status = {};
+    console.log("System rebooting...");
+    this.bootUpSecuritySystem();
+  }
+
   async fetchAllSystemEquipment() {
     const equipmentList = await EquipmentModel.find();
     const sensorList = equipmentList.filter((item) => item.type === "Sensor");
