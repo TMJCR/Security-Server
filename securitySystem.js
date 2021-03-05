@@ -14,7 +14,7 @@ module.exports = class SecuritySystem {
     this.status = {};
   }
   async bootUpSecuritySystem() {
-    console.log("system is booting up");
+    console.log("System booting up");
     await this.fetchAllSystemEquipment();
     this.reportStatus();
   }
@@ -42,6 +42,7 @@ module.exports = class SecuritySystem {
         sensor.name,
         sensor.type,
         sensor._id,
+        sensor.currentStatus,
         sensor.configuration.range,
         sensor.configuration.sensitivity
       );
@@ -53,22 +54,22 @@ module.exports = class SecuritySystem {
 
     // Register cameras
     this.status.cameras = cameraList.map((camera) => {
-      return new Camera(camera.name, camera.type);
+      return new Camera(camera.name, camera.type, camera._id);
     });
 
     // // Register door sensors
     this.status.doorSensors = doorSensorList.map((doorSensor) => {
-      return new DoorSensor(doorSensor.name, doorSensor.type);
+      return new DoorSensor(doorSensor.name, doorSensor.type, doorSensor._id);
     });
 
     // // Register keypads
     this.status.keypads = keypadList.map((keypad) => {
-      return new Keypad(keypad.name, keypad.type);
+      return new Keypad(keypad.name, keypad.type, keypad._id);
     });
 
     // // Register alarms
     this.status.alarms = alarmList.map((alarm) => {
-      return new Alarm(alarm.name, alarm.type);
+      return new Alarm(alarm.name, alarm.type, alarm._id);
     });
   }
   reportStatus() {

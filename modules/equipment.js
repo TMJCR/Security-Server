@@ -13,47 +13,53 @@ class Equipment {
     // console.log(this.status);
     return this.status;
   }
-
-  updateCurrentStatus(newStatus) {
-    this.status.currentStatus === "newStatus";
-  }
 }
 
 class Sensor extends Equipment {
-  constructor(name, type, currentStatus, range = 2, sensitivity = 50) {
-    super(name, type, currentStatus);
+  constructor(name, type, id, currentStatus, range = 2, sensitivity = 50) {
+    super(name, type, id, currentStatus);
     this.status = { ...this.status, configuration: { range, sensitivity } };
   }
   detectMovement(name, currentState) {
     this.status.currentStatus = currentState;
-    console.log(`Sensor named ${name} was Triggered`);
+    return console.log(`Sensor named ${name} was Triggered`);
   }
 }
 
 class Camera extends Equipment {
-  constructor(name, type, currentStatus) {
-    super(name, type, currentStatus);
+  constructor(name, type, id, currentStatus) {
+    super(name, type, id, currentStatus);
   }
 }
 
 class DoorSensor extends Equipment {
-  constructor(name, type, currentStatus) {
-    super(name, type, currentStatus);
+  constructor(name, type, id, currentStatus) {
+    super(name, type, id, currentStatus);
   }
 }
 
 class Keypad extends Equipment {
-  constructor(name, type, currentStatus) {
-    super(name, type, currentStatus);
+  constructor(name, type, id, currentStatus) {
+    super(name, type, id, currentStatus);
+    this.passcode = "1234";
+  }
+  checkKeypadEntry(enteredCode) {
+    return enteredCode === this.passcode;
+  }
+  updatePasscode(newPasscode) {
+    this.passcode = newPasscode;
   }
 }
 
 class Alarm extends Equipment {
-  constructor(name, type, currentStatus) {
-    super(name, type, currentStatus);
+  constructor(name, type, id, currentStatus) {
+    super(name, type, id, currentStatus);
   }
   alert() {
     console.log("Alarm Triggered");
+  }
+  resetAlarm() {
+    this.status.currentStatus = "Ready";
   }
 }
 module.exports = {

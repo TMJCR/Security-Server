@@ -46,7 +46,7 @@ router.post("/create", async (req, res) => {
     await securitySystem.rebootSystem();
     res.send("Success");
   } catch (error) {
-    console.log("f", error);
+    console.log(error);
   }
 });
 
@@ -65,15 +65,24 @@ router.put("/update", async (req, res) => {
 
     res.send(securitySystem.reportStatus());
   } catch (error) {
-    console.log("f", error);
+    console.log(error);
   }
 
   // res.send(securitySystem.reportStatus());
 });
 
-module.exports = router;
+router.put("/keypad", (req, res) => {
+  console.log(req.body);
+  const correctPassword = securitySystem.status.keypads[0].checkKeypadEntry(
+    req.enteredCode
+  );
 
-// await Sensor.findOneAndUpdate(
-//   { name: req.body.name },
-//   { currentStatus: req.body.currentStatus }
-// );
+  if (correctPassword) {
+    securitySystem.status.alarms.forEach((alarm) => alarm.resetAlarm());
+    res.send(securitySystem.reportStatus());
+  } else {
+    res.send({ Response: "Wrong Code Entered" });
+  }
+});
+
+module.exports = router;
