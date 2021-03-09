@@ -37,7 +37,7 @@ module.exports = class SecuritySystem {
     const alarmList = equipmentList.filter((item) => item.type === "Alarm");
 
     // Register sensors
-    const test = sensorList.map((sensor) => {
+    const sensors = sensorList.map((sensor) => {
       return new Sensor(
         sensor.name,
         sensor.type,
@@ -47,10 +47,8 @@ module.exports = class SecuritySystem {
         sensor.configuration.sensitivity
       );
     });
-    const test2 = new Sensor("1", "Sensor", "12", "22");
-    // console.log(test);
-    // console.log(test2.triggerSensor("2"));
-    this.status.sensors = test;
+
+    this.status.sensors = sensors;
 
     // Register cameras
     this.status.cameras = cameraList.map((camera) => {
@@ -59,7 +57,12 @@ module.exports = class SecuritySystem {
 
     // // Register door sensors
     this.status.doorSensors = doorSensorList.map((doorSensor) => {
-      return new DoorSensor(doorSensor.name, doorSensor.type, doorSensor._id);
+      return new DoorSensor(
+        doorSensor.name,
+        doorSensor.type,
+        doorSensor._id,
+        "Closed"
+      );
     });
 
     // // Register keypads

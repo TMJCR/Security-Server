@@ -36,6 +36,12 @@ class DoorSensor extends Equipment {
   constructor(name, type, id, currentStatus) {
     super(name, type, id, currentStatus);
   }
+  detectOpenClose(name, currentState) {
+    const openOrClosed =
+      this.status.currentStatus === "Closed" ? "Open" : "Closed";
+    this.status.currentStatus = openOrClosed;
+    return console.log(`Sensor named ${name} was Triggered`);
+  }
 }
 
 class Keypad extends Equipment {

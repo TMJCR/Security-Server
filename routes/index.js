@@ -51,6 +51,7 @@ router.post("/create", async (req, res) => {
 });
 
 router.put("/update", async (req, res) => {
+  console.log(req.body.type);
   try {
     const triggeredSensor = securitySystem.status.sensors.find(
       (sensor) => sensor.status.name === req.body.name
@@ -77,10 +78,9 @@ router.put("/keypad", (req, res) => {
   );
   if (correctPassword) {
     securitySystem.status.alarms.forEach((alarm) => alarm.resetAlarm());
-    res.send(securitySystem.reportStatus());
-  } else {
-    res.send(securitySystem.reportStatus());
   }
+
+  res.send(securitySystem.reportStatus());
 });
 
 module.exports = router;
