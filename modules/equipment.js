@@ -44,6 +44,7 @@ class Keypad extends Equipment {
     this.passcode = "1234";
   }
   checkKeypadEntry(enteredCode) {
+    console.log(enteredCode, this.passcode);
     return enteredCode === this.passcode;
   }
   updatePasscode(newPasscode) {

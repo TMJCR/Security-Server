@@ -72,16 +72,14 @@ router.put("/update", async (req, res) => {
 });
 
 router.put("/keypad", (req, res) => {
-  console.log(req.body);
   const correctPassword = securitySystem.status.keypads[0].checkKeypadEntry(
-    req.enteredCode
+    req.body.enteredCode
   );
-
   if (correctPassword) {
     securitySystem.status.alarms.forEach((alarm) => alarm.resetAlarm());
     res.send(securitySystem.reportStatus());
   } else {
-    res.send({ Response: "Wrong Code Entered" });
+    res.send(securitySystem.reportStatus());
   }
 });
 
