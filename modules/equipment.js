@@ -20,9 +20,11 @@ class Sensor extends Equipment {
     super(name, type, id, currentStatus);
     this.status = { ...this.status, configuration: { range, sensitivity } };
   }
-  detectMovement(name, currentState) {
+  detectionMethod(name, currentState) {
     this.status.currentStatus = currentState;
-    return console.log(`Sensor named ${name} was Triggered`);
+    console.log(`Sensor named ${name} was Triggered`);
+    //  Check if this should trigger Alarm
+    return true;
   }
 }
 
@@ -36,11 +38,12 @@ class DoorSensor extends Equipment {
   constructor(name, type, id, currentStatus) {
     super(name, type, id, currentStatus);
   }
-  detectOpenClose(name, currentState) {
+  detectionMethod(name, currentState) {
     const openOrClosed =
       this.status.currentStatus === "Closed" ? "Open" : "Closed";
     this.status.currentStatus = openOrClosed;
-    return console.log(`Sensor named ${name} was Triggered`);
+    console.log(`Sensor named ${name} was Triggered`);
+    return true;
   }
 }
 

@@ -13,6 +13,32 @@ securitySystem.bootUpSecuritySystem();
 // });
 const Equipment = require("../models/equipment");
 
+const processSensorDetection = (triggeredSensor) => {
+  const correctSensorList =
+    triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
+
+  try {
+    const extractedSensorFromList = securitySystem.status[
+      correctSensorList
+    ].find((sensor) => sensor.status.name === triggeredSensor.name);
+    const activateAlarm = extractedSensorFromList.detectionMethod(
+      triggeredSensor.name,
+      triggeredSensor.currentState
+    );
+    // Trigger the matching camera
+
+    // Trigger all alarms
+
+    if (activateAlarm) {
+      securitySystem.status.alarms.forEach(
+        (alarm) => (alarm.status.currentStatus = "Triggered")
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 router.get("/", (req, res, next) => {
   res.send(JSON.stringify(securitySystem.reportStatus()));
 });
@@ -51,25 +77,8 @@ router.post("/create", async (req, res) => {
 });
 
 router.put("/update", async (req, res) => {
-  console.log(req.body.type);
-  try {
-    const triggeredSensor = securitySystem.status.sensors.find(
-      (sensor) => sensor.status.name === req.body.name
-    );
-    triggeredSensor.detectMovement(req.body.name, req.body.currentState);
-    // Trigger the matching camera
-
-    // Trigger all alarms
-    securitySystem.status.alarms.forEach(
-      (alarm) => (alarm.status.currentStatus = "Triggered")
-    );
-
-    res.send(securitySystem.reportStatus());
-  } catch (error) {
-    console.log(error);
-  }
-
-  // res.send(securitySystem.reportStatus());
+  await processSensorDetection(req.body);
+  res.send(securitySystem.reportStatus());
 });
 
 router.put("/keypad", (req, res) => {
