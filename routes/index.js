@@ -13,12 +13,12 @@ securitySystem.bootUpSecuritySystem();
 // });
 const Equipment = require("../models/equipment");
 
-const processSensorDetection = (triggeredSensor) => {
+const processSensorDetection = async (triggeredSensor) => {
   const correctSensorList =
     triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
 
   try {
-    const extractedSensorFromList = securitySystem.status[
+    const extractedSensorFromList = await securitySystem.status[
       correctSensorList
     ].find((sensor) => sensor.status.name === triggeredSensor.name);
     const activateAlarm = extractedSensorFromList.detectionMethod(
@@ -26,9 +26,15 @@ const processSensorDetection = (triggeredSensor) => {
       triggeredSensor.currentState
     );
     // Trigger the matching camera
-
+    const connectedCamera = await securitySystem.status.cameras.find(
+      (camera) =>
+        camera.status.name === extractedSensorFromList.status.connectedCamera
+    );
+    if (connectedCamera) {
+      const timeOfTrigger = new Date();
+      connectedCamera.storeFootage(timeOfTrigger);
+    }
     // Trigger all alarms
-
     if (activateAlarm) {
       securitySystem.status.alarms.forEach(
         (alarm) => (alarm.status.currentStatus = "Triggered")
@@ -49,13 +55,14 @@ router.get("/create", (req, res, next) => {
 // POST method route
 router.post("/create", async (req, res) => {
   try {
-    const { type, name, range, sensitivity } = req.body;
+    const { type, name, range, sensitivity, connectedCamera } = req.body;
     let equipmentAttributes = { name, type };
     switch (type) {
       case "Sensor":
         equipmentAttributes = {
           ...equipmentAttributes,
           configuration: { range, sensitivity },
+          connectedCamera,
         };
         break;
       case "Camera":

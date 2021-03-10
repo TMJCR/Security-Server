@@ -16,21 +16,24 @@ class Equipment {
 }
 
 class Sensor extends Equipment {
-  constructor(name, type, id, currentStatus, range = 2, sensitivity = 50) {
+  constructor(
+    name,
+    type,
+    id,
+    currentStatus,
+    range = 2,
+    sensitivity = 50,
+    connectedCamera = null
+  ) {
     super(name, type, id, currentStatus);
-    this.status = { ...this.status, configuration: { range, sensitivity } };
+    const configuration = { configuration: { range, sensitivity } };
+    this.status = { ...this.status, ...configuration, connectedCamera };
   }
   detectionMethod(name, currentState) {
     this.status.currentStatus = currentState;
     console.log(`Sensor named ${name} was Triggered`);
     //  Check if this should trigger Alarm
     return true;
-  }
-}
-
-class Camera extends Equipment {
-  constructor(name, type, id, currentStatus) {
-    super(name, type, id, currentStatus);
   }
 }
 
@@ -44,6 +47,29 @@ class DoorSensor extends Equipment {
     this.status.currentStatus = openOrClosed;
     console.log(`Sensor named ${name} was Triggered`);
     return true;
+  }
+}
+
+class Camera extends Equipment {
+  constructor(name, type, id, currentStatus) {
+    super(name, type, id, currentStatus);
+    this.status.lastRecording = null;
+  }
+  storeFootage(timeOfTrigger) {
+    const durationOfStoredFootageInSeconds = 60;
+    const startOfStoredFootage = new Date(
+      timeOfTrigger.getTime() - (durationOfStoredFootageInSeconds * 1000) / 2
+    );
+
+    const endOfStoredFootage = new Date(
+      timeOfTrigger.getTime() + (durationOfStoredFootageInSeconds * 1000) / 2
+    );
+
+    console.log(
+      "Footage Stored",
+      `Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`
+    );
+    this.status.lastRecording = endOfStoredFootage;
   }
 }
 

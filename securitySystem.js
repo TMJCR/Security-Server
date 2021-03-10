@@ -44,7 +44,8 @@ module.exports = class SecuritySystem {
         sensor._id,
         sensor.currentStatus,
         sensor.configuration.range,
-        sensor.configuration.sensitivity
+        sensor.configuration.sensitivity,
+        sensor.connectedCamera
       );
     });
 
@@ -52,7 +53,7 @@ module.exports = class SecuritySystem {
 
     // Register cameras
     this.status.cameras = cameraList.map((camera) => {
-      return new Camera(camera.name, camera.type, camera._id);
+      return new Camera(camera.name, camera.type, camera._id, "Recording");
     });
 
     // // Register door sensors

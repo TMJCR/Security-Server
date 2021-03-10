@@ -4,6 +4,7 @@ const equipmentSchema = new mongoose.Schema({
   type: String,
   name: String,
   configuration: {},
+  connectedCamera: {},
 });
 
 const EquipmentModel = mongoose.model("EquipmentSchema", equipmentSchema);
