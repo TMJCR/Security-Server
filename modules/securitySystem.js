@@ -1,13 +1,13 @@
-const EquipmentModel = require("./models/equipment");
+const EquipmentModel = require("../models/equipment");
+const ActivityModel = require("../models/activityLog");
 
-const {
-  Sensor,
-  Camera,
-  DoorSensor,
-  Keypad,
-  Alarm,
-} = require("./modules/equipment");
-// const inventory = require("./modules/inventory");
+const { Sensor, Camera, DoorSensor, Keypad, Alarm } = require("./equipment");
+
+const ActivityLog = require("./activityLog");
+const Log = new ActivityLog();
+// Fetch all the previous activity
+// Create a new log for each interaction
+// Push it onto the log
 
 module.exports = class SecuritySystem {
   constructor() {
@@ -80,8 +80,12 @@ module.exports = class SecuritySystem {
     return this.status;
   }
 
-  update(item, state) {
-    console.log(item);
-    this.status.keypads[0].currentStatus = item;
+  // update(item, state) {
+  //   console.log(item);
+  //   this.status.keypads[0].currentStatus = item;
+  // }
+
+  reportActivityLog() {
+    return Log.report();
   }
 };

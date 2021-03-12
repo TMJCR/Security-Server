@@ -1,5 +1,3 @@
-const { v4: uuidv4 } = require("uuid");
-
 class Equipment {
   constructor(name, type, id, currentStatus = "Ready") {
     this.status = {
@@ -10,7 +8,6 @@ class Equipment {
     };
   }
   reportStatus() {
-    // console.log(this.status);
     return this.status;
   }
 }

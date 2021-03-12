@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const activitySchema = new mongoose.Schema({
-  equipment: String,
-  log: String,
   date: Date,
+  log: String,
+  equipment: String,
 });
 
 const ActivityModel = mongoose.model("ActivitySchema", activitySchema);

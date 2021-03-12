@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const SecuritySystem = require("../securitySystem");
+const SecuritySystem = require("../modules/securitySystem");
 
 // Boot-up Security System
 const securitySystem = new SecuritySystem();
@@ -86,6 +86,10 @@ router.post("/create", async (req, res) => {
 router.put("/update", async (req, res) => {
   await processSensorDetection(req.body);
   res.send(securitySystem.reportStatus());
+});
+
+router.get("/log", async (req, res) => {
+  res.send(securitySystem.reportActivityLog());
 });
 
 router.put("/keypad", (req, res) => {
