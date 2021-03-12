@@ -1,10 +1,7 @@
 const EquipmentModel = require("../models/equipment");
-const ActivityModel = require("../models/activityLog");
 
 const { Sensor, Camera, DoorSensor, Keypad, Alarm } = require("./equipment");
-
-const ActivityLog = require("./activityLog");
-const Log = new ActivityLog();
+const ActivityModel = require("../models/activityLog");
 // Fetch all the previous activity
 // Create a new log for each interaction
 // Push it onto the log
@@ -13,9 +10,11 @@ module.exports = class SecuritySystem {
   constructor() {
     this.status = {};
   }
+
   async bootUpSecuritySystem() {
     console.log("System booting up");
     await this.fetchAllSystemEquipment();
+    await this.fetchActivityLog();
     this.reportStatus();
   }
 
@@ -24,6 +23,10 @@ module.exports = class SecuritySystem {
     this.status = {};
     console.log("System rebooting...");
     this.bootUpSecuritySystem();
+  }
+
+  async fetchActivityLog() {
+    this.status.activityLog = await ActivityModel.find();
   }
 
   async fetchAllSystemEquipment() {
@@ -77,6 +80,7 @@ module.exports = class SecuritySystem {
     });
   }
   reportStatus() {
+    this.fetchActivityLog();
     return this.status;
   }
 
@@ -84,8 +88,12 @@ module.exports = class SecuritySystem {
   //   console.log(item);
   //   this.status.keypads[0].currentStatus = item;
   // }
-
   reportActivityLog() {
-    return Log.report();
+    return this.status.activityLog;
+    // date: Date,
+    // log: String,
+    // equipment: String,
+    // await Log.logActivity({ date: new Date() });
+    // await Log.fetchActivityLog();
   }
 };

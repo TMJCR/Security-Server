@@ -1,3 +1,5 @@
+const ActivityModel = require("../models/activityLog");
+
 class Equipment {
   constructor(name, type, id, currentStatus = "Ready") {
     this.status = {
@@ -6,6 +8,11 @@ class Equipment {
       id,
       currentStatus,
     };
+  }
+  async logActivity(activity) {
+    const newLog = await new ActivityModel(activity);
+    console.log(activity.log);
+    newLog.save();
   }
   reportStatus() {
     return this.status;
@@ -26,8 +33,9 @@ class Sensor extends Equipment {
     const configuration = { configuration: { range, sensitivity } };
     this.status = { ...this.status, ...configuration, connectedCamera };
   }
-  detectionMethod(name, currentState) {
+  async detectionMethod(name, currentState) {
     this.status.currentStatus = currentState;
+    await this.logActivity({ log: `Sensor named ${name} was Triggered` });
     console.log(`Sensor named ${name} was Triggered`);
     //  Check if this should trigger Alarm
     return true;
