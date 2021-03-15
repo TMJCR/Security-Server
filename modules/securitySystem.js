@@ -12,6 +12,7 @@ module.exports = class SecuritySystem {
   }
 
   async bootUpSecuritySystem() {
+    await this.logActivity({ log: "System booting up..." });
     console.log("System booting up");
     await this.fetchAllSystemEquipment();
     await this.fetchActivityLog();
@@ -19,20 +20,22 @@ module.exports = class SecuritySystem {
   }
 
   async rebootSystem() {
+    await this.logActivity({ log: "System resetting..." });
     console.log("System resetting...");
     this.status = {};
     console.log("System rebooting...");
+    await this.logActivity({ log: "System re-booting" });
     this.bootUpSecuritySystem();
   }
 
   async fetchActivityLog() {
     const log = await ActivityModel.find();
     this.status.activityLog = log;
-
     return this.status.activityLog;
   }
 
   async fetchAllSystemEquipment() {
+    await this.logActivity({ log: "Registering equipment" });
     const equipmentList = await EquipmentModel.find();
     const sensorList = equipmentList.filter((item) => item.type === "Sensor");
     const cameraList = equipmentList.filter((item) => item.type === "Camera");
@@ -81,9 +84,17 @@ module.exports = class SecuritySystem {
     this.status.alarms = alarmList.map((alarm) => {
       return new Alarm(alarm.name, alarm.type, alarm._id);
     });
+
+    await this.logActivity({ log: "Equipment registration process complete" });
   }
   reportStatus() {
     return this.status;
+  }
+
+  logActivity(activity) {
+    const newLog = new ActivityModel(activity);
+    console.log(activity.log);
+    newLog.save();
   }
 
   // update(item, state) {

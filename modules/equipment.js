@@ -35,8 +35,8 @@ class Sensor extends Equipment {
   }
   async detectionMethod(name, currentState) {
     this.status.currentStatus = currentState;
-    await this.logActivity({ log: `Sensor named ${name} was Triggered` });
-    console.log(`Sensor named ${name} was Triggered`);
+    await this.logActivity({ log: `${name} was Triggered` });
+
     //  Check if this should trigger Alarm
     return true;
   }
@@ -46,11 +46,11 @@ class DoorSensor extends Equipment {
   constructor(name, type, id, currentStatus) {
     super(name, type, id, currentStatus);
   }
-  detectionMethod(name, currentState) {
+  async detectionMethod(name, currentState) {
     const openOrClosed =
       this.status.currentStatus === "Closed" ? "Open" : "Closed";
     this.status.currentStatus = openOrClosed;
-    console.log(`Sensor named ${name} was Triggered`);
+    await this.logActivity({ log: `${name} was Triggered` });
     return true;
   }
 }
@@ -60,7 +60,7 @@ class Camera extends Equipment {
     super(name, type, id, currentStatus);
     this.status.lastRecording = null;
   }
-  storeFootage(timeOfTrigger) {
+  async storeFootage(timeOfTrigger) {
     const durationOfStoredFootageInSeconds = 60;
     const startOfStoredFootage = new Date(
       timeOfTrigger.getTime() - (durationOfStoredFootageInSeconds * 1000) / 2
@@ -69,11 +69,10 @@ class Camera extends Equipment {
     const endOfStoredFootage = new Date(
       timeOfTrigger.getTime() + (durationOfStoredFootageInSeconds * 1000) / 2
     );
+    await this.logActivity({
+      log: `Camera Footage Stored: Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`,
+    });
 
-    console.log(
-      "Footage Stored",
-      `Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`
-    );
     this.status.lastRecording = endOfStoredFootage;
   }
 }
@@ -83,8 +82,17 @@ class Keypad extends Equipment {
     super(name, type, id, currentStatus);
     this.passcode = "1234";
   }
-  checkKeypadEntry(enteredCode) {
+  async checkKeypadEntry(enteredCode) {
     console.log(enteredCode, this.passcode);
+    if (enteredCode === this.passcode) {
+      await this.logActivity({
+        log: `Code Entered Correctly, preparing to reset alarm system`,
+      });
+    } else {
+      await this.logActivity({
+        log: `Incorrect Code Entered`,
+      });
+    }
     return enteredCode === this.passcode;
   }
   updatePasscode(newPasscode) {
@@ -96,11 +104,17 @@ class Alarm extends Equipment {
   constructor(name, type, id, currentStatus) {
     super(name, type, id, currentStatus);
   }
-  alert() {
-    console.log("Alarm Triggered");
+  async alert() {
+    await this.logActivity({
+      log: `ALERT ${this.status.name} has been triggered.`,
+    });
   }
-  resetAlarm() {
+  async resetAlarm() {
+    await this.logActivity({ log: `Resetting ${this.status.name}` });
     this.status.currentStatus = "Ready";
+    await this.logActivity({
+      log: `Alarm reset process complete for ${this.status.name}`,
+    });
   }
 }
 module.exports = {

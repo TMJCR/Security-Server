@@ -36,9 +36,10 @@ const processSensorDetection = async (triggeredSensor) => {
     }
     // Trigger all alarms
     if (activateAlarm) {
-      securitySystem.status.alarms.forEach(
-        (alarm) => (alarm.status.currentStatus = "Triggered")
-      );
+      securitySystem.status.alarms.forEach(async (alarm) => {
+        alarm.status.currentStatus = "Triggered";
+        await alarm.alert();
+      });
     }
   } catch (error) {
     console.log(error);
@@ -94,12 +95,15 @@ router.get("/log", async (req, res) => {
   res.send(log);
 });
 
-router.put("/keypad", (req, res) => {
-  const correctPassword = securitySystem.status.keypads[0].checkKeypadEntry(
+router.put("/keypad", async (req, res) => {
+  const correctPassword = await securitySystem.status.keypads[0].checkKeypadEntry(
     req.body.enteredCode
   );
+
   if (correctPassword) {
-    securitySystem.status.alarms.forEach((alarm) => alarm.resetAlarm());
+    securitySystem.status.alarms.forEach(
+      async (alarm) => await alarm.resetAlarm()
+    );
   }
 
   res.send(securitySystem.reportStatus());
