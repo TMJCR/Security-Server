@@ -85,11 +85,13 @@ router.post("/create", async (req, res) => {
 
 router.put("/update", async (req, res) => {
   await processSensorDetection(req.body);
-  res.send(securitySystem.reportStatus());
+  const status = await securitySystem.reportStatus();
+  res.send(status);
 });
 
 router.get("/log", async (req, res) => {
-  res.send(securitySystem.reportActivityLog());
+  const log = await securitySystem.fetchActivityLog();
+  res.send(log);
 });
 
 router.put("/keypad", (req, res) => {

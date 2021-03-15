@@ -26,7 +26,10 @@ module.exports = class SecuritySystem {
   }
 
   async fetchActivityLog() {
-    this.status.activityLog = await ActivityModel.find();
+    const log = await ActivityModel.find();
+    this.status.activityLog = log;
+
+    return this.status.activityLog;
   }
 
   async fetchAllSystemEquipment() {
@@ -80,7 +83,6 @@ module.exports = class SecuritySystem {
     });
   }
   reportStatus() {
-    this.fetchActivityLog();
     return this.status;
   }
 
@@ -88,12 +90,4 @@ module.exports = class SecuritySystem {
   //   console.log(item);
   //   this.status.keypads[0].currentStatus = item;
   // }
-  reportActivityLog() {
-    return this.status.activityLog;
-    // date: Date,
-    // log: String,
-    // equipment: String,
-    // await Log.logActivity({ date: new Date() });
-    // await Log.fetchActivityLog();
-  }
 };

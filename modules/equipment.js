@@ -9,8 +9,8 @@ class Equipment {
       currentStatus,
     };
   }
-  async logActivity(activity) {
-    const newLog = await new ActivityModel(activity);
+  logActivity(activity) {
+    const newLog = new ActivityModel(activity);
     console.log(activity.log);
     newLog.save();
   }
