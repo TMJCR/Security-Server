@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const activitySchema = new mongoose.Schema({
-  date: Date,
+  date: { type: Date, default: Date },
   log: String,
   equipment: String,
 });

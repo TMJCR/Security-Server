@@ -105,8 +105,8 @@ router.put("/keypad", async (req, res) => {
       async (alarm) => await alarm.resetAlarm()
     );
   }
-
-  res.send(securitySystem.reportStatus());
+  const response = await securitySystem.reportStatus();
+  res.send(response);
 });
 
 module.exports = router;

@@ -50,7 +50,7 @@ class DoorSensor extends Equipment {
     const openOrClosed =
       this.status.currentStatus === "Closed" ? "Open" : "Closed";
     this.status.currentStatus = openOrClosed;
-    await this.logActivity({ log: `${name} was Triggered` });
+    await this.logActivity({ log: `${name} was breached` });
     return true;
   }
 }
@@ -70,7 +70,9 @@ class Camera extends Equipment {
       timeOfTrigger.getTime() + (durationOfStoredFootageInSeconds * 1000) / 2
     );
     await this.logActivity({
-      log: `Camera Footage Stored: Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`,
+      log: `Footage from ${
+        this.status.name
+      } Stored: Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`,
     });
 
     this.status.lastRecording = endOfStoredFootage;
@@ -110,8 +112,8 @@ class Alarm extends Equipment {
     });
   }
   async resetAlarm() {
-    await this.logActivity({ log: `Resetting ${this.status.name}` });
     this.status.currentStatus = "Ready";
+    await this.logActivity({ log: `Resetting ${this.status.name}` });
     await this.logActivity({
       log: `Alarm reset process complete for ${this.status.name}`,
     });
