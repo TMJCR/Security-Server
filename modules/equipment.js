@@ -1,11 +1,12 @@
 const ActivityModel = require("../models/activityLog");
 
 class Equipment {
-  constructor(name, type, id, currentStatus = "Ready") {
+  constructor(name, type, id, zone, currentStatus = "Ready") {
     this.status = {
       name,
       type,
       id,
+      zone,
       currentStatus,
     };
   }
@@ -24,12 +25,13 @@ class Sensor extends Equipment {
     name,
     type,
     id,
+    zone,
     currentStatus,
     range = 2,
     sensitivity = 50,
     connectedCamera = null
   ) {
-    super(name, type, id, currentStatus);
+    super(name, type, id, zone, currentStatus);
     const configuration = { configuration: { range, sensitivity } };
     this.status = { ...this.status, ...configuration, connectedCamera };
   }
@@ -43,8 +45,9 @@ class Sensor extends Equipment {
 }
 
 class DoorSensor extends Equipment {
-  constructor(name, type, id, currentStatus) {
-    super(name, type, id, currentStatus);
+  constructor(name, type, id, zone, currentStatus) {
+    super(name, type, id, zone, currentStatus);
+    this.status;
   }
   async detectionMethod(name, currentState) {
     const openOrClosed =
@@ -56,8 +59,8 @@ class DoorSensor extends Equipment {
 }
 
 class Camera extends Equipment {
-  constructor(name, type, id, currentStatus) {
-    super(name, type, id, currentStatus);
+  constructor(name, type, id, zone, currentStatus) {
+    super(name, type, id, zone, currentStatus);
     this.status.lastRecording = null;
   }
   async storeFootage(timeOfTrigger) {
@@ -80,8 +83,8 @@ class Camera extends Equipment {
 }
 
 class Keypad extends Equipment {
-  constructor(name, type, id, currentStatus) {
-    super(name, type, id, currentStatus);
+  constructor(name, type, id, zone, currentStatus) {
+    super(name, type, id, zone, currentStatus);
     this.passcode = "1234";
   }
   async checkKeypadEntry(enteredCode) {
@@ -103,8 +106,8 @@ class Keypad extends Equipment {
 }
 
 class Alarm extends Equipment {
-  constructor(name, type, id, currentStatus) {
-    super(name, type, id, currentStatus);
+  constructor(name, type, id, zone, currentStatus) {
+    super(name, type, id, zone, currentStatus);
   }
   async alert() {
     await this.logActivity({

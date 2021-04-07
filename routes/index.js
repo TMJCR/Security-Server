@@ -13,6 +13,15 @@ securitySystem.bootUpSecuritySystem();
 // });
 const Equipment = require("../models/equipment");
 
+const openDoor = async (triggeredDoor) => {
+  const door = securitySystem.status.doorSensors.find(
+    (door) => door.status.name === triggeredDoor.name
+  );
+  const newDoorStatus =
+    door.status.currentStatus === "Open" ? "Closed" : "Open";
+  door.status.currentStatus = newDoorStatus;
+};
+
 const processSensorDetection = async (triggeredSensor) => {
   const correctSensorList =
     triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
@@ -56,8 +65,8 @@ router.get("/create", (req, res, next) => {
 // POST method route
 router.post("/create", async (req, res) => {
   try {
-    const { type, name, range, sensitivity, connectedCamera } = req.body;
-    let equipmentAttributes = { name, type };
+    const { type, name, range, sensitivity, connectedCamera, zone } = req.body;
+    let equipmentAttributes = { type, name, zone };
     switch (type) {
       case "Sensor":
         equipmentAttributes = {
@@ -86,6 +95,12 @@ router.post("/create", async (req, res) => {
 
 router.put("/update", async (req, res) => {
   await processSensorDetection(req.body);
+  const status = await securitySystem.reportStatus();
+  res.send(status);
+});
+
+router.put("/openDoor", async (req, res) => {
+  await openDoor(req.body);
   const status = await securitySystem.reportStatus();
   res.send(status);
 });
