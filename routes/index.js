@@ -17,41 +17,10 @@ const openDoor = async (triggeredDoor) => {
   const door = securitySystem.status.doorSensors.find(
     (door) => door.status.name === triggeredDoor.name
   );
-  const newDoorStatus =
-    door.status.currentStatus === "Open" ? "Closed" : "Open";
-  door.status.currentStatus = newDoorStatus;
-};
 
-const processSensorDetection = async (triggeredSensor) => {
-  const correctSensorList =
-    triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
-
-  try {
-    const extractedSensorFromList = await securitySystem.status[
-      correctSensorList
-    ].find((sensor) => sensor.status.name === triggeredSensor.name);
-    const activateAlarm = extractedSensorFromList.detectionMethod(
-      triggeredSensor.name,
-      triggeredSensor.currentState
-    );
-    // Trigger the matching camera
-    const connectedCamera = await securitySystem.status.cameras.find(
-      (camera) =>
-        camera.status.name === extractedSensorFromList.status.connectedCamera
-    );
-    if (connectedCamera) {
-      const timeOfTrigger = new Date();
-      connectedCamera.storeFootage(timeOfTrigger);
-    }
-    // Trigger all alarms
-    if (activateAlarm) {
-      securitySystem.status.alarms.forEach(async (alarm) => {
-        alarm.status.currentStatus = "Triggered";
-        await alarm.alert();
-      });
-    }
-  } catch (error) {
-    console.log(error);
+  if (triggeredDoor.restriction) {
+    await securitySystem.processSensorDetection(triggeredDoor);
+    return true;
   }
 };
 
@@ -93,8 +62,17 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.put("/update", async (req, res) => {
-  await processSensorDetection(req.body);
+router.put("/triggerSensor", async (req, res) => {
+  await securitySystem.processSensorDetection(req.body);
+  const status = await securitySystem.reportStatus();
+  res.send(status);
+});
+
+router.put("/proximityWarning", async (req, res) => {
+  const log = `WARNING: MOTION DETECTED NEAR SENSOR${
+    req.body.name.split("Sensor")[1]
+  }`;
+  await securitySystem.logActivity({ log });
   const status = await securitySystem.reportStatus();
   res.send(status);
 });
@@ -112,16 +90,16 @@ router.get("/log", async (req, res) => {
 
 router.put("/keypad", async (req, res) => {
   const correctPassword = await securitySystem.status.keypads[0].checkKeypadEntry(
-    req.body.enteredCode
+    req.body.passcode.currentPasscode,
+    securitySystem.passcode
   );
 
   if (correctPassword) {
-    securitySystem.status.alarms.forEach(
-      async (alarm) => await alarm.resetAlarm()
-    );
+    const response = await securitySystem.rebootSystem();
+    res.send(response);
   }
-  const response = await securitySystem.reportStatus();
-  res.send(response);
+
+  // const response = await securitySystem.reportStatus();
 });
 
 module.exports = router;

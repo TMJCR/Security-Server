@@ -13,7 +13,7 @@ const http = require("http");
  * Get port from environment and store in Express.
  */
 const CONNECTION_URL =
-  "mongodb+srv://TMJCR:QhMehCkdfJoH8N8d@cluster0.tzcdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+  "mongodb://TMJCR:QhMehCkdfJoH8N8d@cluster0-shard-00-00.tzcdh.mongodb.net:27017,cluster0-shard-00-01.tzcdh.mongodb.net:27017,cluster0-shard-00-02.tzcdh.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-by3vyx-shard-0&authSource=admin&retryWrites=true&w=majority";
 const port = normalizePort(process.env.PORT || "5000");
 app.set("port", port);
 const server = http.createServer(app);
@@ -28,7 +28,7 @@ mongoose
       console.log("server running");
     })
   )
-  .catch((error) => console.log(error.message));
+  .catch((error) => console.log("HERE"));
 mongoose.set("useFindAndModify", false);
 
 server.on("error", onError);

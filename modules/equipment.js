@@ -1,4 +1,5 @@
 const ActivityModel = require("../models/activityLog");
+const SecuritySystem = require("./securitySystem");
 
 class Equipment {
   constructor(name, type, id, zone, currentStatus = "Ready") {
@@ -35,26 +36,31 @@ class Sensor extends Equipment {
     const configuration = { configuration: { range, sensitivity } };
     this.status = { ...this.status, ...configuration, connectedCamera };
   }
-  async detectionMethod(name, currentState) {
-    this.status.currentStatus = currentState;
+  async updateSensorStatus(name, newState) {
+    this.status.currentStatus = newState;
     await this.logActivity({ log: `${name} was Triggered` });
-
-    //  Check if this should trigger Alarm
-    return true;
+    // Now activate camera and alarm
+    if (this.status.currentStatus === "Alert") {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 
 class DoorSensor extends Equipment {
-  constructor(name, type, id, zone, currentStatus) {
+  constructor(name, type, id, zone, currentStatus, position) {
     super(name, type, id, zone, currentStatus);
-    this.status;
+    this.status = { ...this.status, position };
   }
-  async detectionMethod(name, currentState) {
-    const openOrClosed =
-      this.status.currentStatus === "Closed" ? "Open" : "Closed";
-    this.status.currentStatus = openOrClosed;
+  async updateSensorStatus(name, newState) {
+    const newPosition = this.status.position === "Closed" ? "Open" : "Closed";
+    this.status.position = newPosition;
     await this.logActivity({ log: `${name} was breached` });
-    return true;
+    if (this.status.position === "Open") {
+      return true;
+    }
+    return false;
   }
 }
 
@@ -80,16 +86,17 @@ class Camera extends Equipment {
 
     this.status.lastRecording = endOfStoredFootage;
   }
+  updateCameraStatus = () => {
+    this.status.currentStatus = "Recording";
+  };
 }
 
 class Keypad extends Equipment {
   constructor(name, type, id, zone, currentStatus) {
     super(name, type, id, zone, currentStatus);
-    this.passcode = "1234";
   }
-  async checkKeypadEntry(enteredCode) {
-    console.log(enteredCode, this.passcode);
-    if (enteredCode === this.passcode) {
+  async checkKeypadEntry(enteredCode, securitySystemCode) {
+    if (enteredCode.join() === securitySystemCode.join()) {
       await this.logActivity({
         log: `Code Entered Correctly, preparing to reset alarm system`,
       });
@@ -98,10 +105,7 @@ class Keypad extends Equipment {
         log: `Incorrect Code Entered`,
       });
     }
-    return enteredCode === this.passcode;
-  }
-  updatePasscode(newPasscode) {
-    this.passcode = newPasscode;
+    return enteredCode.join() === securitySystemCode.join();
   }
 }
 
@@ -114,6 +118,9 @@ class Alarm extends Equipment {
       log: `ALERT ${this.status.name} has been triggered.`,
     });
   }
+  updateAlarmStatus = () => {
+    this.status.currentStatus = "Alert";
+  };
   async resetAlarm() {
     this.status.currentStatus = "Ready";
     await this.logActivity({ log: `Resetting ${this.status.name}` });

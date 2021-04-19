@@ -8,21 +8,46 @@ const ActivityModel = require("../models/activityLog");
 
 module.exports = class SecuritySystem {
   constructor() {
-    this.status = {
+    this.status = this.setDefaultStatus();
+    this.setRestrictedZones();
+    this.passcode = this.generatePasscode();
+    this.interval = null;
+  }
+
+  generatePasscode = () => {
+    const newPasscode = Array.from([0, 0, 0, 0], (num) =>
+      Math.floor(Math.random() * (8 - 1) + 1).toString()
+    );
+    this.passcode = newPasscode;
+    console.log(this.passcode);
+    return newPasscode;
+  };
+
+  beginAutogeneratePasscode() {
+    this.interval = setInterval(this.generatePasscode, 15000);
+  }
+
+  setDefaultStatus() {
+    return {
       zones: {
-        zone1: { status: "Normal" },
-        zone2: { status: "Normal" },
-        zone3: { status: "Normal" },
-        zone4: { status: "Normal" },
+        zone1: { status: "Normal", camera: "Camera1", alarm: "Alarm1" },
+        zone2: { status: "Normal", camera: "Camera2", alarm: "Alarm2" },
+        zone3: { status: "Normal", camera: "Camera3", alarm: "Alarm3" },
+        zone4: { status: "Normal", camera: "Camera4", alarm: "Alarm4" },
       },
       accessLevel: "NoAccess",
+      alert: false,
+      testingModeMessage: "",
     };
-    if (this.status.accessLevel === "NoAccess") {
-      this.status.restrictedZones = [1, 2, 3, 4];
-    } else if (this.status.accessLevel === "Restricted") {
+  }
+
+  setRestrictedZones() {
+    if (this.status.accessLevel === "Restricted") {
       this.status.restrictedZones = [1, 3];
-    } else {
+    } else if (this.status.accessLevel === "Full Access") {
       this.status.restrictedZones = [];
+    } else {
+      this.status.restrictedZones = [1, 2, 3, 4];
     }
   }
 
@@ -33,16 +58,19 @@ module.exports = class SecuritySystem {
     console.log("System booting up");
     await this.fetchAllSystemEquipment(this.status.accessLevel);
     await this.fetchActivityLog();
-    this.reportStatus();
+    return this.reportStatus();
   }
 
   async rebootSystem() {
     await this.logActivity({ log: "System resetting..." });
     console.log("System resetting...");
-    this.status = {};
+    clearInterval(this.interval);
+    this.status = await this.setDefaultStatus();
     console.log("System rebooting...");
+    this.setRestrictedZones();
+    await this.logActivity({ log: "Setting Up Restricted Zones" });
     await this.logActivity({ log: "System re-booting" });
-    this.bootUpSecuritySystem();
+    return this.bootUpSecuritySystem();
   }
 
   async fetchActivityLog() {
@@ -85,7 +113,7 @@ module.exports = class SecuritySystem {
         camera.type,
         camera._id,
         camera.zone || 1,
-        "Recording"
+        "Ready"
       );
     });
 
@@ -96,6 +124,7 @@ module.exports = class SecuritySystem {
         doorSensor.type,
         doorSensor._id,
         doorSensor.zone || 1,
+        "Ready",
         "Closed"
       );
     });
@@ -112,7 +141,68 @@ module.exports = class SecuritySystem {
 
     await this.logActivity({ log: "Equipment registration process complete" });
   }
+
+  alertZone(zone) {
+    zone.status = "Alert";
+  }
+
+  activateZoneCamera(zone) {
+    const Camera = this.status.cameras.find(
+      (camera) => camera.status.name === zone.camera
+    );
+
+    Camera.updateCameraStatus();
+    const timeOfTrigger = new Date();
+    Camera.storeFootage(timeOfTrigger);
+  }
+
+  async activateZoneAlarm(zone) {
+    const Alarm = this.status.alarms.find(
+      (alarm) => alarm.status.name === zone.alarm
+    );
+    await Alarm.updateAlarmStatus();
+    Alarm.alert();
+  }
+
+  async triggerAlert(zone) {
+    clearInterval(this.interval);
+    this.status.alert = true;
+    await this.alertZone(zone);
+    await this.activateZoneCamera(zone);
+    await this.activateZoneAlarm(zone);
+    this.beginAutogeneratePasscode();
+  }
+
+  processSensorDetection = async (triggeredSensor) => {
+    const correctSensorList =
+      triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
+
+    try {
+      const extractedSensor = await this.status[correctSensorList].find(
+        (sensor) => sensor.status.name === triggeredSensor.name
+      );
+
+      const sensorZone = this.status.zones[
+        `zone${extractedSensor.status.zone}`
+      ];
+
+      const raiseAlert = await extractedSensor.updateSensorStatus(
+        triggeredSensor.name,
+        triggeredSensor.currentState
+      );
+
+      if (raiseAlert) {
+        this.triggerAlert(sensorZone);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   reportStatus() {
+    if (this.status.alert) {
+      this.status.testingModeMessage = this.passcode;
+    }
     return this.status;
   }
 
