@@ -12,19 +12,37 @@ module.exports = class SecuritySystem {
     this.setRestrictedZones();
     this.passcode = this.generatePasscode();
     this.interval = null;
+    this.timer = null;
   }
 
   generatePasscode = () => {
+    clearInterval(this.timer);
+    this.status.testingMode.timeElapsed = 15;
     const newPasscode = Array.from([0, 0, 0, 0], (num) =>
       Math.floor(Math.random() * (8 - 1) + 1).toString()
     );
     this.passcode = newPasscode;
-    console.log(this.passcode);
+
+    if (this.status.alert) {
+      this.startCountdown();
+    }
+
     return newPasscode;
+  };
+
+  startCountdown = () => {
+    this.timer = setInterval(() => {
+      if (this.status.testingMode.timeElapsed > 0) {
+        this.status.testingMode.timeElapsed -= 1;
+      } else {
+        this.status.testingMode.timeElapsed = 15;
+      }
+    }, 1000);
   };
 
   beginAutogeneratePasscode() {
     this.interval = setInterval(this.generatePasscode, 15000);
+    this.generatePasscode();
   }
 
   setDefaultStatus() {
@@ -37,7 +55,8 @@ module.exports = class SecuritySystem {
       },
       accessLevel: "NoAccess",
       alert: false,
-      testingModeMessage: "",
+      testingMode: { message: "", timeElapsed: 15 },
+      cameraMessage: "Camera Ready",
     };
   }
 
@@ -150,7 +169,7 @@ module.exports = class SecuritySystem {
     const Camera = this.status.cameras.find(
       (camera) => camera.status.name === zone.camera
     );
-
+    this.status.cameraMessage = `${zone.camera} recording...`;
     Camera.updateCameraStatus();
     const timeOfTrigger = new Date();
     Camera.storeFootage(timeOfTrigger);
@@ -165,12 +184,14 @@ module.exports = class SecuritySystem {
   }
 
   async triggerAlert(zone) {
-    clearInterval(this.interval);
-    this.status.alert = true;
+    if (!this.status.alert) {
+      clearInterval(this.interval);
+      this.status.alert = true;
+      this.beginAutogeneratePasscode();
+    }
     await this.alertZone(zone);
     await this.activateZoneCamera(zone);
     await this.activateZoneAlarm(zone);
-    this.beginAutogeneratePasscode();
   }
 
   processSensorDetection = async (triggeredSensor) => {
@@ -201,7 +222,7 @@ module.exports = class SecuritySystem {
 
   reportStatus() {
     if (this.status.alert) {
-      this.status.testingModeMessage = this.passcode;
+      this.status.testingMode.message = this.passcode;
     }
     return this.status;
   }

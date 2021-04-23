@@ -88,6 +88,11 @@ router.get("/log", async (req, res) => {
   res.send(log);
 });
 
+router.get("/cameraMessage", async (req, res) => {
+  const message = await securitySystem.reportStatus().cameraMessage;
+  res.send({ message });
+});
+
 router.put("/keypad", async (req, res) => {
   const correctPassword = await securitySystem.status.keypads[0].checkKeypadEntry(
     req.body.passcode.currentPasscode,
