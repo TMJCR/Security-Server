@@ -21,6 +21,17 @@ const openDoor = async (triggeredDoor) => {
   if (triggeredDoor.restriction) {
     await securitySystem.processSensorDetection(triggeredDoor);
     return true;
+  } else {
+    const logMessage = `was ${
+      door.status.position === "Closed" ? "Opened" : "Closed"
+    }`;
+    console.log(door);
+    await door.updateSensorStatus(
+      triggeredDoor.name,
+      door.currentState,
+      logMessage
+    );
+    return true;
   }
 };
 
@@ -78,7 +89,15 @@ router.put("/proximityWarning", async (req, res) => {
 });
 
 router.put("/openDoor", async (req, res) => {
+  console.log(req.body);
   await openDoor(req.body);
+  const status = await securitySystem.reportStatus();
+  res.send(status);
+});
+
+router.put("/accessLevel", async (req, res) => {
+  console.log(req.body);
+  await securitySystem.changeAccessLevel(req.body.accessLevel);
   const status = await securitySystem.reportStatus();
   res.send(status);
 });

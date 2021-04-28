@@ -63,14 +63,32 @@ module.exports = class SecuritySystem {
   setRestrictedZones() {
     if (this.status.accessLevel === "Restricted") {
       this.status.restrictedZones = [1, 3];
-    } else if (this.status.accessLevel === "Full Access") {
+      this.status.zones.zone1.status = "Normal";
+      this.status.zones.zone2.status = "Unrestricted";
+      this.status.zones.zone3.status = "Normal";
+      this.status.zones.zone4.status = "Unrestricted";
+    } else if (this.status.accessLevel === "FullAccess") {
       this.status.restrictedZones = [];
+      this.status.zones.zone1.status = "Unrestricted";
+      this.status.zones.zone2.status = "Unrestricted";
+      this.status.zones.zone3.status = "Unrestricted";
+      this.status.zones.zone4.status = "Unrestricted";
     } else {
+      console.log(this.status.restrictedZones);
       this.status.restrictedZones = [1, 2, 3, 4];
+      this.status.zones.zone1.status = "Normal";
+      this.status.zones.zone2.status = "Normal";
+      this.status.zones.zone3.status = "Normal";
+      this.status.zones.zone4.status = "Normal";
+
+      console.log(this.status.restrictedZones);
     }
   }
 
-  changeAccessLevel() {}
+  changeAccessLevel(accessLevel) {
+    this.status.accessLevel = accessLevel;
+    this.setRestrictedZones();
+  }
 
   async bootUpSecuritySystem() {
     await this.logActivity({ log: "System booting up..." });
@@ -198,6 +216,11 @@ module.exports = class SecuritySystem {
     const correctSensorList =
       triggeredSensor.type === "DoorSensor" ? "doorSensors" : "sensors";
 
+    const logMessage =
+      correctSensorList === "doorSensors"
+        ? "was breached"
+        : "detected movement in restricted zone";
+
     try {
       const extractedSensor = await this.status[correctSensorList].find(
         (sensor) => sensor.status.name === triggeredSensor.name
@@ -209,7 +232,8 @@ module.exports = class SecuritySystem {
 
       const raiseAlert = await extractedSensor.updateSensorStatus(
         triggeredSensor.name,
-        triggeredSensor.currentState
+        triggeredSensor.currentState,
+        logMessage
       );
 
       if (raiseAlert) {

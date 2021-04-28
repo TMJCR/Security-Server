@@ -11,10 +11,11 @@ class Equipment {
       currentStatus,
     };
   }
-  logActivity(activity) {
+  async logActivity(activity) {
     const newLog = new ActivityModel(activity);
     console.log(activity.log);
-    newLog.save();
+    await newLog.save();
+    return true;
   }
   reportStatus() {
     return this.status;
@@ -36,9 +37,9 @@ class Sensor extends Equipment {
     const configuration = { configuration: { range, sensitivity } };
     this.status = { ...this.status, ...configuration, connectedCamera };
   }
-  async updateSensorStatus(name, newState) {
+  async updateSensorStatus(name, newState, message) {
     this.status.currentStatus = newState;
-    await this.logActivity({ log: `${name} was Triggered` });
+    await this.logActivity({ log: `${name} ${message}` });
     // Now activate camera and alarm
     if (this.status.currentStatus === "Alert") {
       return true;
@@ -53,10 +54,10 @@ class DoorSensor extends Equipment {
     super(name, type, id, zone, currentStatus);
     this.status = { ...this.status, position };
   }
-  async updateSensorStatus(name, newState) {
+  async updateSensorStatus(name, newState, message) {
     const newPosition = this.status.position === "Closed" ? "Open" : "Closed";
     this.status.position = newPosition;
-    await this.logActivity({ log: `${name} was breached` });
+    await this.logActivity({ log: `${name} ${message}` });
     if (this.status.position === "Open") {
       return true;
     }
