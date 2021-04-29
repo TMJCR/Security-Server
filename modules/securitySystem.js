@@ -133,7 +133,7 @@ module.exports = class SecuritySystem {
         sensor.name,
         sensor.type,
         sensor._id,
-        sensor.zone || 1,
+        sensor.zone,
         sensor.currentStatus,
         sensor.configuration.range,
         sensor.configuration.sensitivity,
@@ -149,7 +149,7 @@ module.exports = class SecuritySystem {
         camera.name,
         camera.type,
         camera._id,
-        camera.zone || 1,
+        camera.zone,
         "Ready"
       );
     });
@@ -160,7 +160,7 @@ module.exports = class SecuritySystem {
         doorSensor.name,
         doorSensor.type,
         doorSensor._id,
-        doorSensor.zone || 1,
+        doorSensor.zone,
         "Ready",
         "Closed"
       );
@@ -229,7 +229,7 @@ module.exports = class SecuritySystem {
       const sensorZone = this.status.zones[
         `zone${extractedSensor.status.zone}`
       ];
-
+      console.log(extractedSensor.status, sensorZone);
       const raiseAlert = await extractedSensor.updateSensorStatus(
         triggeredSensor.name,
         triggeredSensor.currentState,
