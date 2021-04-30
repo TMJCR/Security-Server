@@ -25,11 +25,11 @@ const openDoor = async (triggeredDoor) => {
     const logMessage = `was ${
       door.status.position === "Closed" ? "Opened" : "Closed"
     }`;
-    console.log(door);
     await door.updateSensorStatus(
       triggeredDoor.name,
       door.currentState,
-      logMessage
+      logMessage,
+      "Alert"
     );
     return true;
   }
@@ -83,20 +83,25 @@ router.put("/proximityWarning", async (req, res) => {
   const log = `WARNING: MOTION DETECTED NEAR SENSOR${
     req.body.name.split("Sensor")[1]
   }`;
-  await securitySystem.logActivity({ log });
+  await securitySystem.logActivity({
+    activity: log,
+    type: "Warning",
+  });
   const status = await securitySystem.reportStatus();
   res.send(status);
 });
 
 router.put("/openDoor", async (req, res) => {
-  console.log(req.body);
   await openDoor(req.body);
   const status = await securitySystem.reportStatus();
   res.send(status);
 });
 
 router.put("/accessLevel", async (req, res) => {
-  console.log(req.body);
+  await securitySystem.logActivity({
+    activity: `Processing Access Level update request...`,
+    type: "Informational",
+  });
   await securitySystem.changeAccessLevel(req.body.accessLevel);
   const status = await securitySystem.reportStatus();
   res.send(status);

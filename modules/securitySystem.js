@@ -62,51 +62,74 @@ module.exports = class SecuritySystem {
 
   setRestrictedZones() {
     if (this.status.accessLevel === "Restricted") {
+      this.restrictedZoneMessage = `Current Access Level: Zone 1 and Zone 3 are restricted`;
       this.status.restrictedZones = [1, 3];
       this.status.zones.zone1.status = "Normal";
       this.status.zones.zone2.status = "Unrestricted";
       this.status.zones.zone3.status = "Normal";
       this.status.zones.zone4.status = "Unrestricted";
     } else if (this.status.accessLevel === "FullAccess") {
+      this.restrictedZoneMessage = `Current Access Level: Access is granted to all zones`;
       this.status.restrictedZones = [];
       this.status.zones.zone1.status = "Unrestricted";
       this.status.zones.zone2.status = "Unrestricted";
       this.status.zones.zone3.status = "Unrestricted";
       this.status.zones.zone4.status = "Unrestricted";
     } else {
-      console.log(this.status.restrictedZones);
+      this.restrictedZoneMessage = `Current Access Level: All zones are restircted`;
       this.status.restrictedZones = [1, 2, 3, 4];
       this.status.zones.zone1.status = "Normal";
       this.status.zones.zone2.status = "Normal";
       this.status.zones.zone3.status = "Normal";
       this.status.zones.zone4.status = "Normal";
-
-      console.log(this.status.restrictedZones);
     }
+
+    return true;
   }
 
-  changeAccessLevel(accessLevel) {
+  async changeAccessLevel(accessLevel) {
     this.status.accessLevel = accessLevel;
     this.setRestrictedZones();
+    await this.logActivity({
+      activity: `Access Level to be updated to ${accessLevel}`,
+      type: "Informational",
+    });
+    await this.logActivity({
+      activity: this.restrictedZoneMessage,
+      type: "Success",
+    });
   }
 
   async bootUpSecuritySystem() {
-    await this.logActivity({ log: "System booting up..." });
-    console.log("System booting up");
+    await this.logActivity({
+      activity: "Preparing to reboot system...",
+      type: "Informational",
+    });
     await this.fetchAllSystemEquipment(this.status.accessLevel);
     await this.fetchActivityLog();
+    await this.logActivity({
+      activity: "System reboot successful",
+      type: "Success",
+    });
     return this.reportStatus();
   }
 
   async rebootSystem() {
-    await this.logActivity({ log: "System resetting..." });
-    console.log("System resetting...");
+    await this.logActivity({
+      activity: "Beginning full system reset...",
+      type: "Informational",
+    });
     clearInterval(this.interval);
     this.status = await this.setDefaultStatus();
-    console.log("System rebooting...");
     this.setRestrictedZones();
-    await this.logActivity({ log: "Setting Up Restricted Zones" });
-    await this.logActivity({ log: "System re-booting" });
+    await this.logActivity({
+      activity: "System successfully reset",
+      type: "Success",
+    });
+    await this.logActivity({
+      activity: "Assigning Restricted Zones...",
+      type: "Informational",
+    });
     return this.bootUpSecuritySystem();
   }
 
@@ -117,7 +140,10 @@ module.exports = class SecuritySystem {
   }
 
   async fetchAllSystemEquipment(accessLevel) {
-    await this.logActivity({ log: "Registering equipment" });
+    await this.logActivity({
+      activity: "Registering equipment",
+      type: "Informational",
+    });
     const equipmentList = await EquipmentModel.find();
     const sensorList = equipmentList.filter((item) => item.type === "Sensor");
     const cameraList = equipmentList.filter((item) => item.type === "Camera");
@@ -176,7 +202,10 @@ module.exports = class SecuritySystem {
       return new Alarm(alarm.name, alarm.type, alarm._id, alarm.zone || 1);
     });
 
-    await this.logActivity({ log: "Equipment registration process complete" });
+    await this.logActivity({
+      activity: "Equipment registration process complete",
+      type: "Success",
+    });
   }
 
   alertZone(zone) {
@@ -229,11 +258,11 @@ module.exports = class SecuritySystem {
       const sensorZone = this.status.zones[
         `zone${extractedSensor.status.zone}`
       ];
-      console.log(extractedSensor.status, sensorZone);
       const raiseAlert = await extractedSensor.updateSensorStatus(
         triggeredSensor.name,
         triggeredSensor.currentState,
-        logMessage
+        logMessage,
+        "Alert"
       );
 
       if (raiseAlert) {
@@ -251,14 +280,9 @@ module.exports = class SecuritySystem {
     return this.status;
   }
 
-  logActivity(activity) {
-    const newLog = new ActivityModel(activity);
-    console.log(activity.log);
-    newLog.save();
+  async logActivity(log) {
+    const { activity, type } = log;
+    const newLog = new ActivityModel({ log: activity, type });
+    await newLog.save();
   }
-
-  // update(item, state) {
-  //   console.log(item);
-  //   this.status.keypads[0].currentStatus = item;
-  // }
 };

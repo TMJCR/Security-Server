@@ -11,9 +11,9 @@ class Equipment {
       currentStatus,
     };
   }
-  async logActivity(activity) {
-    const newLog = new ActivityModel(activity);
-    console.log(activity.log);
+  async logActivity(log) {
+    const { activity, type } = log;
+    const newLog = new ActivityModel({ log: activity, type });
     await newLog.save();
     return true;
   }
@@ -37,9 +37,12 @@ class Sensor extends Equipment {
     const configuration = { configuration: { range, sensitivity } };
     this.status = { ...this.status, ...configuration, connectedCamera };
   }
-  async updateSensorStatus(name, newState, message) {
+  async updateSensorStatus(name, newState, message, type) {
     this.status.currentStatus = newState;
-    await this.logActivity({ log: `${name} ${message}` });
+    await this.logActivity({
+      activity: `${name} ${message}`,
+      type,
+    });
     // Now activate camera and alarm
     if (this.status.currentStatus === "Alert") {
       return true;
@@ -54,10 +57,13 @@ class DoorSensor extends Equipment {
     super(name, type, id, zone, currentStatus);
     this.status = { ...this.status, position };
   }
-  async updateSensorStatus(name, newState, message) {
+  async updateSensorStatus(name, newState, message, type) {
     const newPosition = this.status.position === "Closed" ? "Open" : "Closed";
     this.status.position = newPosition;
-    await this.logActivity({ log: `${name} ${message}` });
+    await this.logActivity({
+      activity: `Alert: ${name} ${message}`,
+      type,
+    });
     if (this.status.position === "Open") {
       return true;
     }
@@ -79,10 +85,12 @@ class Camera extends Equipment {
     const endOfStoredFootage = new Date(
       timeOfTrigger.getTime() + (durationOfStoredFootageInSeconds * 1000) / 2
     );
+
     await this.logActivity({
-      log: `Footage from ${
+      activity: `Footage from ${
         this.status.name
       } Stored: Start: ${startOfStoredFootage.toLocaleString()} - End: ${endOfStoredFootage.toLocaleTimeString()}`,
+      type: "Success",
     });
 
     this.status.lastRecording = endOfStoredFootage;
@@ -99,11 +107,13 @@ class Keypad extends Equipment {
   async checkKeypadEntry(enteredCode, securitySystemCode) {
     if (enteredCode.join() === securitySystemCode.join()) {
       await this.logActivity({
-        log: `Code Entered Correctly, preparing to reset alarm system`,
+        activity: `Code Entered Correctly, preparing to reset alarm system`,
+        type: "Success",
       });
     } else {
       await this.logActivity({
-        log: `Incorrect Code Entered`,
+        activity: `ALERT: Incorrect Code Entered`,
+        type: "Alert",
       });
     }
     return enteredCode.join() === securitySystemCode.join();
@@ -116,7 +126,8 @@ class Alarm extends Equipment {
   }
   async alert() {
     await this.logActivity({
-      log: `ALERT ${this.status.name} has been triggered.`,
+      activity: `ALERT: ${this.status.name} has been triggered.`,
+      type: "Alert",
     });
   }
   updateAlarmStatus = () => {
@@ -124,9 +135,14 @@ class Alarm extends Equipment {
   };
   async resetAlarm() {
     this.status.currentStatus = "Ready";
-    await this.logActivity({ log: `Resetting ${this.status.name}` });
     await this.logActivity({
-      log: `Alarm reset process complete for ${this.status.name}`,
+      activity: `Resetting ${this.status.name}`,
+      type: "Warning",
+    });
+
+    await this.logActivity({
+      activity: `Alarm reset process complete for ${this.status.name}`,
+      type: "Success",
     });
   }
 }

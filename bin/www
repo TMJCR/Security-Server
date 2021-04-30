@@ -28,7 +28,7 @@ mongoose
       console.log("server running");
     })
   )
-  .catch((error) => console.log("HERE"));
+  .catch((error) => console.log(error));
 mongoose.set("useFindAndModify", false);
 
 server.on("error", onError);
