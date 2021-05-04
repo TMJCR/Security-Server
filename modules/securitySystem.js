@@ -188,7 +188,8 @@ module.exports = class SecuritySystem {
         doorSensor._id,
         doorSensor.zone,
         "Ready",
-        "Closed"
+        "Closed",
+        "grey"
       );
     });
 

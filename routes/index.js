@@ -25,11 +25,13 @@ const openDoor = async (triggeredDoor) => {
     const logMessage = `was ${
       door.status.position === "Closed" ? "Opened" : "Closed"
     }`;
+    const color = door.status.position === "Closed" ? "green" : "grey";
     await door.updateSensorStatus(
       triggeredDoor.name,
       door.currentState,
       logMessage,
-      "Alert"
+      "Alert",
+      color
     );
     return true;
   }

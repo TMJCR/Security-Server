@@ -53,13 +53,14 @@ class Sensor extends Equipment {
 }
 
 class DoorSensor extends Equipment {
-  constructor(name, type, id, zone, currentStatus, position) {
+  constructor(name, type, id, zone, currentStatus, position, color) {
     super(name, type, id, zone, currentStatus);
-    this.status = { ...this.status, position };
+    this.status = { ...this.status, position, color };
   }
-  async updateSensorStatus(name, newState, message, type) {
+  async updateSensorStatus(name, newState, message, type, color = "red") {
     const newPosition = this.status.position === "Closed" ? "Open" : "Closed";
     this.status.position = newPosition;
+    this.status.color = color;
     await this.logActivity({
       activity: `Alert: ${name} ${message}`,
       type,
