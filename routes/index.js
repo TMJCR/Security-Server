@@ -30,7 +30,7 @@ const openDoor = async (triggeredDoor) => {
       triggeredDoor.name,
       door.currentState,
       logMessage,
-      "Alert",
+      "Informational",
       color
     );
     return true;

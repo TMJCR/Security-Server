@@ -62,7 +62,7 @@ class DoorSensor extends Equipment {
     this.status.position = newPosition;
     this.status.color = color;
     await this.logActivity({
-      activity: `Alert: ${name} ${message}`,
+      activity: `${name} ${message}`,
       type,
     });
     if (this.status.position === "Open") {
