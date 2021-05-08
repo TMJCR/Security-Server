@@ -128,6 +128,8 @@ router.put("/keypad", async (req, res) => {
   if (correctPassword) {
     const response = await securitySystem.rebootSystem();
     res.send(response);
+  } else {
+    res.send({ error: "Incorrect Code Entered" });
   }
 
   // const response = await securitySystem.reportStatus();
