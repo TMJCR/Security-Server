@@ -35,7 +35,12 @@ class Sensor extends Equipment {
   ) {
     super(name, type, id, zone, currentStatus);
     const configuration = { configuration: { range, sensitivity } };
-    this.status = { ...this.status, ...configuration, connectedCamera };
+    this.status = {
+      ...this.status,
+      color: "grey",
+      ...configuration,
+      connectedCamera,
+    };
   }
   async updateSensorStatus(name, newState, message, type) {
     this.status.currentStatus = newState;
@@ -45,8 +50,10 @@ class Sensor extends Equipment {
     });
     // Now activate camera and alarm
     if (this.status.currentStatus === "Alert") {
+      this.status.color = "red";
       return true;
     } else {
+      this.status.color = "green";
       return false;
     }
   }
@@ -76,6 +83,7 @@ class Camera extends Equipment {
   constructor(name, type, id, zone, currentStatus) {
     super(name, type, id, zone, currentStatus);
     this.status.lastRecording = null;
+    this.status.color = "green";
   }
   async storeFootage(timeOfTrigger) {
     const durationOfStoredFootageInSeconds = 60;
@@ -104,14 +112,17 @@ class Camera extends Equipment {
 class Keypad extends Equipment {
   constructor(name, type, id, zone, currentStatus) {
     super(name, type, id, zone, currentStatus);
+    this.status.color = "green";
   }
   async checkKeypadEntry(enteredCode, securitySystemCode) {
     if (enteredCode.join() === securitySystemCode.join()) {
+      this.status.color = "green";
       await this.logActivity({
         activity: `Code Entered Correctly, preparing to reset alarm system`,
         type: "Success",
       });
     } else {
+      this.status.color = "red";
       await this.logActivity({
         activity: `ALERT: Incorrect Code Entered`,
         type: "Alert",
@@ -124,6 +135,7 @@ class Keypad extends Equipment {
 class Alarm extends Equipment {
   constructor(name, type, id, zone, currentStatus) {
     super(name, type, id, zone, currentStatus);
+    this.status.color = "green";
   }
   async alert() {
     await this.logActivity({
@@ -132,9 +144,11 @@ class Alarm extends Equipment {
     });
   }
   updateAlarmStatus = () => {
+    this.status.color = "red";
     this.status.currentStatus = "Alert";
   };
   async resetAlarm() {
+    this.status.color = "green";
     this.status.currentStatus = "Ready";
     await this.logActivity({
       activity: `Resetting ${this.status.name}`,

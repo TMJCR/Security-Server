@@ -57,6 +57,11 @@ module.exports = class SecuritySystem {
       alert: false,
       testingMode: { message: "", timeElapsed: 15 },
       cameraMessage: "Camera Ready",
+      lastSync: new Date()
+        .toISOString()
+        .replace(/T/, " ")
+        .replace(/\..+/, "")
+        .slice(-8),
     };
   }
 
