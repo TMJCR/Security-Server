@@ -98,7 +98,7 @@ class Camera extends Equipment {
     await this.logActivity({
       activity: `Footage from ${
         this.status.name
-      } Stored: ${startOfStoredFootage.toLocaleString()} - : ${endOfStoredFootage.toLocaleTimeString()}`,
+      } Stored: ${startOfStoredFootage.toLocaleString()}`,
       type: "Success",
     });
 
