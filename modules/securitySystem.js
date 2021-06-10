@@ -58,7 +58,7 @@ module.exports = class SecuritySystem {
       testingMode: { message: "", timeElapsed: 15 },
       cameraMessage: "Camera Ready",
       lastSync: new Date()
-        .toLocaleString("en-US", { timeZone: "Europe/London" })
+        .toLocaleString("en-GB", { timeZone: "Europe/London" })
         .slice(-11),
     };
   }
@@ -222,7 +222,7 @@ module.exports = class SecuritySystem {
     );
     this.status.cameraMessage = `${zone.camera} recording...`;
     Camera.updateCameraStatus();
-    const timeOfTrigger = new Date().toLocaleString("en-US", {
+    const timeOfTrigger = new Date().toLocaleString("en-GB", {
       timeZone: "Europe/London",
     });
     Camera.storeFootage(timeOfTrigger);
@@ -287,7 +287,7 @@ module.exports = class SecuritySystem {
 
   async logActivity(log) {
     const { activity, type } = log;
-    const date = new Date().toLocaleString("en-US", {
+    const date = new Date().toLocaleString("en-GB", {
       timeZone: "Europe/London",
     });
     const newLog = new ActivityModel({ date, log: activity, type });

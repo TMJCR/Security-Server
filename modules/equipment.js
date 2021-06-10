@@ -13,7 +13,7 @@ class Equipment {
   }
   async logActivity(log) {
     const { activity, type } = log;
-    const date = new Date().toLocaleString("en-US", {
+    const date = new Date().toLocaleString("en-GB", {
       timeZone: "Europe/London",
     });
     const newLog = new ActivityModel({ date, log: activity, type });
