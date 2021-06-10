@@ -92,7 +92,9 @@ class Camera extends Equipment {
     await this.logActivity({
       activity: `Footage from ${
         this.status.name
-      } Stored: ${startOfStoredFootage.toLocaleString()}`,
+      } Stored: ${startOfStoredFootage.toLocaleString("en-US", {
+        timeZone: "Europe/London",
+      })}`,
       type: "Success",
     });
   }

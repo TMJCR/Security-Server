@@ -57,7 +57,9 @@ module.exports = class SecuritySystem {
       alert: false,
       testingMode: { message: "", timeElapsed: 15 },
       cameraMessage: "Camera Ready",
-      lastSync: new Date().toLocaleString().slice(-10),
+      lastSync: new Date()
+        .toLocaleString("en-US", { timeZone: "Europe/London" })
+        .slice(-11),
     };
   }
 
