@@ -57,11 +57,7 @@ module.exports = class SecuritySystem {
       alert: false,
       testingMode: { message: "", timeElapsed: 15 },
       cameraMessage: "Camera Ready",
-      lastSync: new Date()
-        .toISOString()
-        .replace(/T/, " ")
-        .replace(/\..+/, "")
-        .slice(-8),
+      lastSync: new Date().toLocaleString().slice(-8),
     };
   }
 
@@ -224,7 +220,7 @@ module.exports = class SecuritySystem {
     );
     this.status.cameraMessage = `${zone.camera} recording...`;
     Camera.updateCameraStatus();
-    const timeOfTrigger = new Date();
+    const timeOfTrigger = new Date().toLocaleString();
     Camera.storeFootage(timeOfTrigger);
   }
 
@@ -261,9 +257,8 @@ module.exports = class SecuritySystem {
         (sensor) => sensor.status.name === triggeredSensor.name
       );
 
-      const sensorZone = this.status.zones[
-        `zone${extractedSensor.status.zone}`
-      ];
+      const sensorZone =
+        this.status.zones[`zone${extractedSensor.status.zone}`];
       const raiseAlert = await extractedSensor.updateSensorStatus(
         triggeredSensor.name,
         triggeredSensor.currentState,

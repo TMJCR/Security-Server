@@ -87,13 +87,7 @@ class Camera extends Equipment {
   }
   async storeFootage(timeOfTrigger) {
     const durationOfStoredFootageInSeconds = 60;
-    const startOfStoredFootage = new Date(
-      timeOfTrigger.getTime() - (durationOfStoredFootageInSeconds * 1000) / 2
-    );
-
-    const endOfStoredFootage = new Date(
-      timeOfTrigger.getTime() + (durationOfStoredFootageInSeconds * 1000) / 2
-    );
+    const startOfStoredFootage = timeOfTrigger.slice(-8);
 
     await this.logActivity({
       activity: `Footage from ${
@@ -101,8 +95,6 @@ class Camera extends Equipment {
       } Stored: ${startOfStoredFootage.toLocaleString()}`,
       type: "Success",
     });
-
-    this.status.lastRecording = endOfStoredFootage;
   }
   updateCameraStatus = () => {
     this.status.currentStatus = "Recording";
