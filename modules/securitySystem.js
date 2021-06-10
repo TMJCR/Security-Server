@@ -222,7 +222,9 @@ module.exports = class SecuritySystem {
     );
     this.status.cameraMessage = `${zone.camera} recording...`;
     Camera.updateCameraStatus();
-    const timeOfTrigger = new Date().toLocaleString();
+    const timeOfTrigger = new Date().toLocaleString(.toLocaleString("en-US", {
+      timeZone: "Europe/London",
+    }));
     Camera.storeFootage(timeOfTrigger);
   }
 

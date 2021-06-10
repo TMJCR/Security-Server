@@ -90,11 +90,7 @@ class Camera extends Equipment {
     const startOfStoredFootage = timeOfTrigger.slice(-8);
 
     await this.logActivity({
-      activity: `Footage from ${
-        this.status.name
-      } Stored: ${startOfStoredFootage.toLocaleString("en-US", {
-        timeZone: "Europe/London",
-      })}`,
+      activity: `Footage from ${this.status.name} Stored: ${startOfStoredFootage}`,
       type: "Success",
     });
   }
